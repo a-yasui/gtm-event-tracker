@@ -1,7 +1,7 @@
-GA Event Tracker
+GTM Event Tracker
 ==============
 
-A jQuery plugin to help with Google Analytics Event tracking.
+A jQuery plugin to help with Google Tag Manager Event tracking.
 
 How to use:
 
@@ -11,9 +11,9 @@ How to use:
 &lt;script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"&gt;&lt;/script&gt;
 </pre>
 
-<strong>Step 2: Install Google Analytcs</strong>
+<strong>Step 2: Create your dataLayer</strong>
 
-Classic Code (Replace UA-XXXXXX-X with your Google Analytics Account #)
+Classic Code (Replace GTM-XXXXX with your Google Tag Manager Account #)
 <pre>
 &lt;script&gt;
 	var _gaq = _gaq || [];
@@ -30,45 +30,32 @@ Classic Code (Replace UA-XXXXXX-X with your Google Analytics Account #)
 &lt;/script&gt;
 </pre>
 
-Universal Code (Replace UA-XXXXXX-X with your Google Analytics Account #)
+
+<strong>Step 3: Include jquery.gtmeventtracker.js after gtm.js</strong>
 
 <pre>
-&lt;script&gt;
-	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-	})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-	
-	ga('create', 'UA-XXXXXX-X', 'auto');
-	ga('send', 'pageview');
-&lt;/script&gt;
-</pre>
-
-<strong>Step 3: Include jquery.gaeventtracker.js after Google Analyitcs</strong>
-
-<pre>
-&lt;script src="//raw.github.com/derekcavaliero/ga-event-tracker/v1.0/jquery.gaeventtracker.js"&gt;&lt;/script&gt;
+&lt;script src="//raw.github.com/bkingcis/gtm-event-tracker/v1.0/jquery.gtmeventtracker.js"&gt;&lt;/script&gt;
 </pre>
 
 <strong>Step 4: Modify HTML for tracked items</strong>
 
 <pre>
 &lt;a href="http://www.google.com" target="_blank" class="track-it" 
-    data-ga-category="Outbound Links" 
-    data-ga-action="Google" 
-    data-ga-label="Google Homepage" 
-    data-ga-value="100" 
-    data-ga-nonint="false" 
-    data-ga-delay="false"&gt;google.com&lt;/a&gt;
+    data-gtm-category="Outbound Links" 
+    data-gtm-action="Google" 
+    data-gtm-label="Google Homepage" 
+    data-gtm-value="100" 
+    data-gtm-nonint="false" 
+    data-gtm-delay="false"&gt;google.com&lt;/a&gt;
 </pre>
 
-<strong>Step 5: Initialize a new .gaeventracker object on .ready()</strong>
+<strong>Step 5: Initialize a new .gtmeventracker object on .ready()</strong>
 
 <pre>
 &lt;script&gt;
 	jQuery( document ).ready(function( $ ) {
 	
-		$('.track-it').gaeventtracker({ 		// Target all elements with class "track-it"
+		$('.track-it').gtmeventtracker({ 		// Target all elements with class "track-it"
 		
 	  		'category' : 'Fallback Category',	// Fallback to use if data-ga-category attribute isn't set
 	  		'action'   : 'Fallback Action',		// Fallback to use if data-ga-action attribute isn't set
