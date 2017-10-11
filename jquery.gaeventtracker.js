@@ -6,215 +6,213 @@
  * Requires: jQuery v1.4.3 or later
  */
 
-;(function ( $ ) {
+;(function ($) {
+    $.fn.gatrack = function (options) {
+        var defaults = {
+            'category': 'Tracked Element',
+            'action': 'Clicked',
+            'label': location.pathname,
+            'value': 0,
+            'nonint': true,
+            'delay': true,
+            'delay_timeout': 100,		  // time for delay in milliseconds
+            'trigger': 'click',    // click | focus | blur
+            'ga_type': 'classic',  // classic | universal | all
+            'debug': {
+                'type': 'console', // console or alert
+                'status': true
+            }
+        };
 
-	$.fn.gatrack = function( options ){
+        var settings = $.extend({}, defaults, options);
 
-		var defaults = {
-						'category'      : 'Tracked Element',
-						'action'        : 'Clicked',
-						'label'         : location.pathname,
-						'value'         : 0,
-						'nonint'        : true,
-						'delay'         : true,
-						'delay_timeout' : 100,		  // time for delay in milliseconds
-						'trigger'       : 'click',    // click | focus | blur
-						'ga_type'       : 'classic',  // classic | universal | all
-						'debug'         : {
-										       'type'   : 'console', // console or alert
-										       'status' : true
-										  }
-				   };
+        return this.each(function (i, elem) {
 
-	    var settings = $.extend( {}, defaults, options );
+            var $this = $(this);
 
-		return this.each( function(i, elem) {
+            if (( $this.data('ga-nonint') != undefined ) &&
+                ( $this.data('ga-nonint') != settings.nonint )) {
 
-			var $this = $( this );
+                nonint = $this.data('ga-nonint');
 
-	    	if ( ( $this.data( 'ga-nonint' ) != undefined ) &&
-	    		 ( $this.data( 'ga-nonint' ) != settings.nonint ) ){
+            } else {
 
-	    		nonint = $this.data( 'ga-nonint' );
+                nonint = settings.nonint;
 
-	    	} else {
+            }
 
-		    	nonint = settings.nonint;
+            if (( $this.data('ga-delay') != undefined ) &&
+                ( $this.data('ga-delay') != settings.delay )) {
 
-	    	}
+                delay = $this.data('ga-delay');
 
-	    	if ( ( $this.data( 'ga-delay' ) != undefined ) &&
-	    		 ( $this.data( 'ga-delay' ) != settings.delay ) ){
+            } else {
 
-		    	delay = $this.data( 'ga-delay' );
+                delay = settings.delay;
 
-	    	} else {
+            }
 
-		    	delay = settings.delay;
+            var eventvalues = {
+                'category': $this.data('ga-category') ? $this.data('ga-category') : settings.category,
+                'action': $this.data('ga-action') ? $this.data('ga-action') : settings.action,
+                'label': $this.data('ga-label') ? $this.data('ga-label') : settings.label,
+                'value': $this.data('ga-value') ? $this.data('ga-value') : settings.value,
+                'nonint': nonint,
+                'delay': delay,
+                'ga_type': $this.data('ga-type') ? $this.data('ga-type') : settings.ga_type,
+                'link': $this.attr('href') ? $this.attr('href') : false,
+                'trigger': $this.data('ga-trigger') ? $this.data('ga-trigger') : settings.trigger
+            }
 
-	    	}
+            $this.on(eventvalues.trigger, function (e) {
 
-			var eventvalues = {
-				'category' : $this.data( 'ga-category' ) ? $this.data( 'ga-category' ) : settings.category,
-				'action'   : $this.data( 'ga-action' ) ? $this.data( 'ga-action' ) : settings.action,
-				'label'    : $this.data( 'ga-label' ) ? $this.data( 'ga-label' ) : settings.label,
-				'value'    : $this.data( 'ga-value' ) ? $this.data( 'ga-value' ) : settings.value,
-				'nonint'   : nonint,
-				'delay'    : delay,
-				'ga_type'  : $this.data( 'ga-type' ) ? $this.data( 'ga-type' ) : settings.ga_type,
-				'link'     : $this.attr( 'href' ) ? $this.attr( 'href' ) : false,
-				'trigger'  : $this.data( 'ga-trigger' ) ? $this.data( 'ga-trigger' ) : settings.trigger
-			}
+                if (eventvalues.delay) {
+                    e.preventDefault();
+                }
 
-	      	$this.on( eventvalues.trigger, function( e ){
+                trackEvent($this, eventvalues, e);
 
-	        	if( eventvalues.delay ){
-	        		e.preventDefault();
-	      		}
+                switch (eventvalues.trigger) {
 
-	        	trackEvent( $this, eventvalues, e );
+                    case 'click':
 
-	        	switch( eventvalues.trigger ){
+                        if (eventvalues.link) {
 
-		        	case 'click':
+                            if (eventvalues.delay) {
 
-			        	if( eventvalues.link ){
+                                setTimeout(function () {
+                                    document.location.href = eventvalues.link;
+                                }, settings.delay_timeout);
 
-			        		if( eventvalues.delay ){
+                            }
+                        }
 
-			        			setTimeout( function(){
-						        	document.location.href = eventvalues.link;
-						        }, settings.delay_timeout );
+                        break;
 
-			        		}
-			        	}
+                }
 
-		        	break;
+                if (settings.debug.status) {
 
-	        	}
+                    var debugString = '\nTrigger Action: ' + eventvalues.trigger +
+                        '\nCategory: ' + eventvalues.category +
+                        '\nAction: ' + eventvalues.action +
+                        '\nLabel: ' + eventvalues.label +
+                        '\nValue: ' + eventvalues.value +
+                        '\nNon-Interaction: ' + eventvalues.nonint +
+                        '\nDelay: ' + eventvalues.delay +
+                        '\nDelay Length: ' + settings.delay_timeout + ' milliseconds' +
+                        '\nGA Type: ' + eventvalues.ga_type +
+                        '\nLink Value: ' + eventvalues.link;
 
-	        	if( settings.debug.status ){
+                    switch (settings.debug.type) {
 
-					var debugString = '\nTrigger Action: ' + eventvalues.trigger +
-						    		  '\nCategory: ' + eventvalues.category +
-						    		  '\nAction: ' + eventvalues.action +
-						    		  '\nLabel: ' + eventvalues.label  +
-						    		  '\nValue: ' + eventvalues.value +
-						    		  '\nNon-Interaction: ' + eventvalues.nonint +
-						    		  '\nDelay: ' + eventvalues.delay +
-						    		  '\nDelay Length: ' + settings.delay_timeout + ' milliseconds' +
-						    		  '\nGA Type: ' + eventvalues.ga_type +
-						    		  '\nLink Value: ' + eventvalues.link;
+                        case 'alert':
 
-					switch( settings.debug.type ){
+                            alert(debugString);
 
-				    	case 'alert':
+                            break;
 
-					    	alert( debugString );
+                        case 'console':
+                        default:
 
-				    	break;
+                            console.log(debugString);
 
-						case 'console':
-						default:
+                            break;
 
-					    	console.log( debugString );
+                    }
 
-				    	break;
+                }
 
-			    	}
+            });
 
-				}
+        });
 
-	      	});
+        function trackEvent(obj, eventvalues, e) {
 
-		});
+            console.log(obj);
 
-		function trackEvent( obj, eventvalues, e ){
+            var sendBeacon = function (type) {
 
-			console.log(obj);
+                switch (type) {
 
-			var sendBeacon = function( type ){
+                    case 'classic':
 
-				switch( type ) {
+                        _gaq.push(
+                            [
+                                '_trackEvent',
+                                eventvalues.category,
+                                eventvalues.action,
+                                eventvalues.label,
+                                eventvalues.value,
+                                eventvalues.nonint
+                            ]
+                        );
 
-					case 'classic':
+                        break;
 
-						_gaq.push(
-									[
-										'_trackEvent',
-										eventvalues.category,
-										eventvalues.action,
-										eventvalues.label,
-										eventvalues.value,
-										eventvalues.nonint
-									]
-								 );
+                    case 'universal':
 
-					break;
+                        ga('send', 'event',
+                            eventvalues.category,
+                            eventvalues.action,
+                            eventvalues.label,
+                            eventvalues.value, {
+                                'nonInteraction': eventvalues.nonint
+                                //'hitCallback': function() {}
+                            }
+                        );
 
-					case 'universal':
+                        break;
 
-						ga( 'send', 'event',
-								eventvalues.category,
-								eventvalues.action,
-								eventvalues.label,
-								eventvalues.value, {
-												   		'nonInteraction' : eventvalues.nonint
-												   		//'hitCallback': function() {}
-												   }
-						);
+                }
 
-					break;
+            };
 
-				}
+            switch (eventvalues.ga_type) {
 
-			};
+                case 'all':
 
-			switch( eventvalues.ga_type ) {
+                    sendBeacon('classic');
+                    sendBeacon('universal');
 
-				case 'all':
+                    break;
 
-					sendBeacon( 'classic' );
-					sendBeacon( 'universal' );
+                case 'universal':
 
-				break;
+                    sendBeacon('universal');
 
-				case 'universal':
+                    break;
 
-					sendBeacon( 'universal' );
+                case 'classic':
+                default:
 
-				break;
+                    sendBeacon('classic');
 
-				case 'classic':
-				default:
+                    break;
 
-					sendBeacon( 'classic' );
+            }
 
-				break;
+        }
 
-			}
+    };
 
-	    }
+    /*var iterations = 100;
+    var totalTime = 0;
 
-	};
+    for (i = 0; i < iterations; i++) {
 
-	/*var iterations = 100;
-	var totalTime = 0;
+      var start = new Date().getTime();
 
-	for (i = 0; i < iterations; i++) {
+      $( 'a[data-ga-track], input[data-ga-track], textarea[data-ga-track], button[data-ga-track]' ).gaeventtracker();
 
-	  var start = new Date().getTime();
+      var end = new Date().getTime();
 
-	  $( 'a[data-ga-track], input[data-ga-track], textarea[data-ga-track], button[data-ga-track]' ).gaeventtracker();
+      totalTime += (end - start);
 
-	  var end = new Date().getTime();
+    }
 
-	  totalTime += (end - start);
+    console.log( 'Query finished with an average of ' + totalTime / iterations + 'ms total elapsed time of ' + totalTime + 'ms' );*/
 
-	}
+    $('a[data-ga-track], input[data-ga-track], textarea[data-ga-track], button[data-ga-track]').gatrack();
 
-	console.log( 'Query finished with an average of ' + totalTime / iterations + 'ms total elapsed time of ' + totalTime + 'ms' );*/
-
-	$( 'a[data-ga-track], input[data-ga-track], textarea[data-ga-track], button[data-ga-track]' ).gatrack();
-
-}( jQuery ) );
+}(jQuery) );
